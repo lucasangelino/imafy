@@ -1,0 +1,29 @@
+---
+import StepEdit from '../components/StepEdit.astro';
+import StepUpload from '../components/StepUpload.astro';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Welcome to Astro.">
+	<main class="flex flex-col gap-4 items-center w-full ">
+		<StepUpload />
+		<StepEdit />
+	</main>
+</Layout>
+
+<script>
+	import { imageStatus } from "../store/store";
+	import { ImageStatus } from "../types/types";
+
+	imageStatus.subscribe((status) => {
+		if (status === ImageStatus.IDDLE) {
+			document.getElementById('dropzone').style.display = 'flex';
+			document.getElementById('setpEdit').style.display = 'none';
+		}
+
+		if (status === ImageStatus.LOADED) {
+			document.getElementById('dropzone').style.display = 'none';
+			document.getElementById('setpEdit').style.display = 'flex';
+		}
+	});
+</script>

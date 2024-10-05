@@ -1,0 +1,72 @@
+<form 
+    id="dropzone"
+    action="https://api.cloudinary.com/v1_1/lucasangelinodev/image/upload"
+    class="aspect-video shadow-xl border-dashed w-full max-w-xl border-2 p-20 rounded-xl
+            border-gray-200 flex flex-col gap-4 justify-center
+            "
+>
+    <button id="form_btn" class="pointer-events-none text-gray-400 px-6 py-2">
+        Select or drop an image
+    </button>
+
+    <span id="upload_confirmation" class="hidden text-center">Image loaded in Cloudinary</span>
+</form>
+
+<script>
+    import Dropzone from "dropzone";
+    import { Cloudinary } from '@cloudinary/url-gen';
+    import { generativeRestore, colorize } from "@cloudinary/url-gen/actions/effect";
+
+    import 'dropzone/dist/dropzone.css';
+    import { imageStatus, originalImage, transformedImage } from "../store/store";
+    import { ImageStatus } from "../types/types";
+
+    const cloudinary = new Cloudinary({
+        cloud: {
+            cloudName: "lucasangelinodev",
+        },
+        url: {
+            secure: true,
+        },
+    });
+
+    imageStatus.subscribe((status) => {
+        if (status !== ImageStatus.IDDLE) {
+            document.getElementById('form_btn').style.display = 'none';
+        }
+        if (status === ImageStatus.LOADED) {
+            document.getElementById('upload_confirmation').style.display = 'block';
+        }
+    });
+
+    const dropzone = new Dropzone("#dropzone", {
+        autoProcessQueue: true,
+        acceptedFiles: ".png, .jpg, .jpeg, .webp, .avif",
+        maxFiles: 1,
+    });
+    dropzone.on("sending", (file, xhr, formData) => {
+        imageStatus.set(ImageStatus.LOADING)
+        formData.append("upload_preset", "reimage");
+        formData.append("timestamp", Date.now() / 1000);
+        formData.append("api_key", 122257786313142);
+    });
+    dropzone.on("success", (file, response) => {
+        imageStatus.set(ImageStatus.LOADED)
+        const {secure_url: url, public_id: publicId} = response;
+        const imageRestored = cloudinary
+                        .image(publicId)
+                        .effect(generativeRestore())
+                        // .effect(colorize().level(40).color('green'))
+                        .toURL();
+        
+
+        console.log(url);
+        originalImage.set(url);
+        transformedImage.set(imageRestored);
+        console.log(response);
+    });
+    dropzone.on("error", (file, response) => {
+        console.error(response);
+    });
+
+</script>

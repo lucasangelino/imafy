@@ -1,0 +1,28 @@
+<section id="setpEdit" class="flex flex-col gap-4">
+    <two-up>
+        <img id="original_image" src="" alt="Original Image Loaded by user">
+        <img id="transformed_image" src="" alt="Transformed Image processes by Cloudinary">
+    </two-up>
+    <a download href="">Descargar</a>
+</section>
+
+<script>
+    import "two-up-element";
+    import { originalImage, transformedImage } from "../store/store";
+    const originalImageEl = document.querySelector("#original_image");
+    const transformedImageEl = document.querySelector("#transformed_image");
+    const downloadLink = document.querySelector("a");
+
+    console.log(originalImage)
+    originalImage.subscribe((url) => {
+        console.log("changed: ", url);
+        originalImageEl.src = url;
+    });
+
+    transformedImage.subscribe((url) => {
+        transformedImageEl.src = url;
+        downloadLink.href = url;
+
+    });
+
+</script>
